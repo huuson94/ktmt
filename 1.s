@@ -72,24 +72,15 @@ introutine:
 		#Step 2 ------------------------------------------------
 		
 step2:	
-		
-		xor 	t2,zero,t1			# Dao gia tri cua den
+		 
+		xori 	t2,t2,0xFF			# Dao gia tri cua den
 		sb  	t2, 0(t0)    		# Hien thi ra den led 
-		nop	
+		nop
+			
 		j ends						# Ket thuc 1 chu ki
 		nop
 		#End of step 2 -----------------------------------------
 		
-k1t:		
-		addi t3,zero,0				# Neu dang trong luc lap k1, bam k1 thi tinh lai tu dau
-		
-k1s:
-		addi t2,zero,0xF0			# 
-		sb 	 t2, 0(t0)				# Hien thi den nhu yeu cau
-		addi t3,t3,1				# Tang bien dem so chu ki len 1
-		j ends
-		nop							# Ket thuc 1 chu ki
-k2t:	
 
 ends: 	
 		
@@ -110,7 +101,7 @@ ends:
         lw      t5, 16*4(sp)
         lw      t4, 15*4(sp)
         lw      t3, 14*4(sp)
-        lw      t2, 13*4(sp)
+        #lw      t2, 13*4(sp)
         lw      t1, 12*4(sp)
         lw      t0, 11*4(sp)
         lw      a3, 10*4(sp)
@@ -193,6 +184,7 @@ step1:
 		sb  t1, 0(t0)    // Hien thi ra den led 
 		nop	
 		addi t3,zero,0		# Bien dem bang 0
+		ori 	t2,t1,0x00  #Bien temp t2 = t1 de thay doi den
 		#End of step 1 --------------------------------------------
 Loop:   
 
