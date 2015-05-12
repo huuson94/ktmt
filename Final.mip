@@ -1,0 +1,16 @@
+Final
+D:\sem6\Ky6\Ky6\thuchanhKTMT\ProjectCuoiky\De1\Final\
+Objects\
+1
+D:\sem6\Ky6\Ky6\thuchanhKTMT\ProjectCuoiky\De1\Final\1.s
+0
+0
+1
+minic
+0
+0
+0
+0
+1
+objcopy.exe -O srec Final.out Final.srec
+80020000 start
