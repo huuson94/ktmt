@@ -72,15 +72,47 @@ introutine:
 		#Step 2 ------------------------------------------------
 		
 step2:	
-		 
+		addi 	t4,zero,1
+		bne 	t4,t5,step2_t		#Kiem tra xem co trong vong loop cua k1 hay khong. Neu khong thi khong kiem tra dieu kien 3 lan
+		nop
+		addi	t4,zero,3
+		bne 	t3,t4,k1s			#Kiem tra neu k1 chua dem du 3 lan; t3 de luu so lan lap
+		nop
+		addi 	t5,zero,0			# Du 3 lan thi reset bien flag t5
+		addi 	t3,zero,0			# Du 3 lan thi reset bien dem
+		addi 	t2,t1,0				# Du 3 lan thi reset trang thai den
+		
+step2_t:
+		lbu 	a3, 0x0(s0)     	# Read the interrupt I/O port
+		li	 	t4,0x64
+		beq		a3,t4,k1t			# Kiem tra xem tin hieu ngat co phai do k1 gay ra khong
+		nop							#
+		li	 	t4,0x60
+		beq 	a3,t4,k1t			#
+		nop							#
+		li	 	t4,0x54
+		beq	 	a3,t4,k2t			# Kiem tra xem tin hieu ngat co phai do k2 gay ra khong
+		nop							#
+		li 		t4,0x50
+		beq 	a3,t4,k2t			#
+		nop							#
 		xori 	t2,t2,0xFF			# Dao gia tri cua den
 		sb  	t2, 0(t0)    		# Hien thi ra den led 
 		nop
-			
 		j ends						# Ket thuc 1 chu ki
 		nop
 		#End of step 2 -----------------------------------------
 		
+k1t:		
+		addi t3,zero,0				# Neu dang trong luc lap k1, bam k1 thi tinh lai tu dau
+		addi t5,zero,1				# t5 luu gia tri de xac dinh la loop vi k1
+k1s:
+		addi t2,zero,0xF0			# 
+		sb 	 t2, 0(t0)				# Hien thi den nhu yeu cau
+		addi t3,t3,1				# Tang bien dem so chu ki len 1
+		j ends
+		nop							# Ket thuc 1 chu ki
+k2t:	
 
 ends: 	
 		
@@ -98,10 +130,10 @@ ends:
         lw      t8, 18*4(sp)
         lw      t7, 18*4(sp)
         lw      t6, 17*4(sp)
-        lw      t5, 16*4(sp)
+#        lw      t5, 16*4(sp)
         lw      t4, 15*4(sp)
-        lw      t3, 14*4(sp)
-        #lw      t2, 13*4(sp)
+#        lw      t3, 14*4(sp)
+#        lw      t2, 13*4(sp)
         lw      t1, 12*4(sp)
         lw      t0, 11*4(sp)
         lw      a3, 10*4(sp)
@@ -182,9 +214,10 @@ step1:
 		nop
 		li  t0, LEDS     // Lay dia chi cua den Led    
 		sb  t1, 0(t0)    // Hien thi ra den led 
-		nop	
+		nop
+		addi t2,t1,0		# Bien temp de hien thi den	
 		addi t3,zero,0		# Bien dem bang 0
-		ori 	t2,t1,0x00  #Bien temp t2 = t1 de thay doi den
+		addi t5,zero,0		# Flag xac dinh xem co dang trong loop cua k1 khong
 		#End of step 1 --------------------------------------------
 Loop:   
 
