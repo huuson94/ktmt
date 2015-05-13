@@ -71,9 +71,9 @@ introutine:
 		
 		#Step 2 ------------------------------------------------
 		
-step2:	
+check_k1:	
 		addi 	t4,zero,1
-		bne 	t4,t5,step2_t		#Kiem tra xem co trong vong loop cua k1 hay khong. Neu khong thi khong kiem tra dieu kien 3 lan
+		bne 	t4,t5,check_k2		#Kiem tra xem co trong vong loop cua k1 hay khong. Neu khong thi khong kiem tra dieu kien 3 lan va check xem co phai dang loop cua k2 khong
 		nop
 		addi	t4,zero,3
 		bne 	t3,t4,k1s			#Kiem tra neu k1 chua dem du 3 lan; t3 de luu so lan lap
@@ -81,7 +81,18 @@ step2:
 		addi 	t5,zero,0			# Du 3 lan thi reset bien flag t5
 		addi 	t3,zero,0			# Du 3 lan thi reset bien dem
 		addi 	t2,t1,0				# Du 3 lan thi reset trang thai den
-		
+		xori		t2,t2,0xFF			# reset cho lan dau tien
+check_k2:	
+		addi 	t4,zero,1
+		bne 	t4,t6,step2_t		#Kiem tra xem co trong vong loop cua k1 hay khong. Neu khong thi khong kiem tra dieu kien 3 lan va check xem co phai dang loop cua k2 khong
+		nop
+		addi	t4,zero,3
+		bne 	t3,t4,k2s			#Kiem tra neu k1 chua dem du 3 lan; t3 de luu so lan lap
+		nop
+		addi 	t6,zero,0			# Du 3 lan thi reset bien flag t6
+		addi 	t3,zero,0			# Du 3 lan thi reset bien dem
+		addi 	t2,t1,0				# Du 3 lan thi reset trang thai den		
+		xori		t2,t2,0xFF			# reset cho lan dau tien
 step2_t:
 		lbu 	a3, 0x0(s0)     	# Read the interrupt I/O port
 		li	 	t4,0x64
@@ -90,10 +101,28 @@ step2_t:
 		li	 	t4,0x60
 		beq 	a3,t4,k1t			#
 		nop							#
+		li	 	t4,0x20
+		beq 	a3,t4,k1t			#
+		nop							#
+		li	 	t4,0x66
+		beq 	a3,t4,k1t			#
+		nop							#
+		li	 	t4,0x62
+		beq 	a3,t4,k1t			#
+		nop							#
 		li	 	t4,0x54
 		beq	 	a3,t4,k2t			# Kiem tra xem tin hieu ngat co phai do k2 gay ra khong
 		nop							#
 		li 		t4,0x50
+		beq 	a3,t4,k2t			#
+		nop							#
+		li 		t4,0x10
+		beq 	a3,t4,k2t			#
+		nop							#
+		li 		t4,0x51
+		beq 	a3,t4,k2t			#
+		nop							#
+		li 		t4,0x55
 		beq 	a3,t4,k2t			#
 		nop							#
 		xori 	t2,t2,0xFF			# Dao gia tri cua den
@@ -112,8 +141,16 @@ k1s:
 		addi t3,t3,1				# Tang bien dem so chu ki len 1
 		j ends
 		nop							# Ket thuc 1 chu ki
-k2t:	
-
+k2t:		
+		addi t3,zero,0				# Neu dang trong luc lap k1, bam k1 thi tinh lai tu dau
+		addi t6,zero,1				# t6 luu gia tri de xac dinh la loop vi k1
+k2s:
+		addi t2,zero,0x3C			# 
+		sb 	 t2, 0(t0)				# Hien thi den nhu yeu cau
+		addi t3,t3,1				# Tang bien dem so chu ki len 1
+		j ends
+		nop							# Ket thuc 1 chu ki	
+		
 ends: 	
 		
         #--------------------------------------------------------
@@ -129,7 +166,7 @@ ends:
         lw      t9, 20*4(sp)
         lw      t8, 18*4(sp)
         lw      t7, 18*4(sp)
-        lw      t6, 17*4(sp)
+#        lw      t6, 17*4(sp)
 #        lw      t5, 16*4(sp)
         lw      t4, 15*4(sp)
 #        lw      t3, 14*4(sp)
@@ -218,6 +255,7 @@ step1:
 		addi t2,t1,0		# Bien temp de hien thi den	
 		addi t3,zero,0		# Bien dem bang 0
 		addi t5,zero,0		# Flag xac dinh xem co dang trong loop cua k1 khong
+		addi t6,zero,0		# Flag xac dinh xem co dang trong loop cua k2 khong
 		#End of step 1 --------------------------------------------
 Loop:   
 
