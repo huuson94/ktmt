@@ -99,7 +99,7 @@ step2_t:
 		nop
 		j ends						# Ket thuc 1 chu ki
 		nop
-		#End of step 2 -----------------------------------------
+
 		
 k1t:		
 		addi t3,zero,0				# Neu dang trong luc lap k1, bam k1 thi tinh lai tu dau
@@ -118,9 +118,10 @@ k2s:
 		sb 	 t2, 0(t0)				# Hien thi den nhu yeu cau
 		addi t3,t3,1				# Tang bien dem so chu ki len 1
 		j ends
-		nop							# Ket thuc 1 chu ki	xu li ngat
+		nop							
+		#End of step 2 -----------------------------------------
 		
-ends: 	
+ends: 								# Ket thuc 1 chu ki	xu li ngat
 		
         #--------------------------------------------------------
         # Reset the I/O port address to zero after serving interrupt
@@ -174,7 +175,7 @@ intstub:
 .end intstub
 
 
-.globl start            # Start of the main program
+.globl start            		# Start of the main program
 .ent start
 start:
         #----------------------------------------------------------
@@ -215,16 +216,16 @@ start:
 		
 		#Step1 ----------------------------------------------------
 step1:
-        li  t0, SWITCHES // Lay dia chi cua SWITCH
-		lb  t1, 0(t0)    // Doc trang thai SWITCH va luu vao t1
+        li  t0, SWITCHES 		# Lay dia chi cua SWITCH
+		lb  t1, 0(t0)    		# Doc trang thai SWITCH va luu vao t1
 		nop
-		li  t0, LEDS     // Lay dia chi cua den Led    
-		sb  t1, 0(t0)    // Hien thi ra den led 
+		li  t0, LEDS     		# Lay dia chi cua den Led    
+		sb  t1, 0(t0)    		# Hien thi ra den led 
 		nop
-		addi t2,t1,0		# Bien temp de hien thi den	
-		addi t3,zero,0		# Bien dem bang 0
-		addi t5,zero,0		# Flag xac dinh xem co dang trong loop cua k1 khong
-		addi t6,zero,0		# Flag xac dinh xem co dang trong loop cua k2 khong
+		addi t2,t1,0			# Bien temp de hien thi den	
+		addi t3,zero,0			# Bien dem bang 0
+		addi t5,zero,0			# Flag xac dinh xem co dang trong loop cua k1 khong
+		addi t6,zero,0			# Flag xac dinh xem co dang trong loop cua k2 khong
 		#End of step 1 --------------------------------------------
 Loop:   
 
