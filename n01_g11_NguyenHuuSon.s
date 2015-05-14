@@ -61,7 +61,7 @@ introutine:
         #--------------------------------------------------------        
 		
 		#Step 2 ------------------------------------------------
-		
+		lbu 	a3, 0x0(s0)     	# Read the interrupt I/O port
 check_k1:	
 		addi 	t4,zero,1
 		bne 	t4,t5,check_k2		#Kiem tra xem co trong vong loop cua k1 hay khong. Neu khong thi khong kiem tra dieu kien 3 lan va check xem co phai dang loop cua k2 khong
@@ -83,16 +83,16 @@ check_k2:
 		addi 	t6,zero,0			# Du 3 lan thi reset bien flag t6
 		addi 	t3,zero,0			# Du 3 lan thi reset bien dem
 		addi 	t2,t1,0				# Du 3 lan thi reset trang thai den		
-		xori		t2,t2,0xFF			# reset cho lan dau tien
+		xori	t2,t2,0xFF			# reset cho lan dau tien
 step2_t:
-		lbu 	a3, 0x0(s0)     	# Read the interrupt I/O port
+		
 		li		t4,0x20				# Vi k1 = 0x01000x0
 		and		t4,a3,t4
-		bne		t4,zero,k1t			# Kiem tra xem tin hieu ngat co phai do k1 gay ra khong, co thi jump den k1t
+		bne		t4,zero,k1s			# Kiem tra xem tin hieu ngat co phai do k1 gay ra khong, co thi jump den k1t
 		nop							#
 		li		t4,0x10				# Vi k2 = 0x01000x0
 		and		t4,a3,t4
-		bne	 	t4,zero,k2t			# Kiem tra xem tin hieu ngat co phai do k2 gay ra khong, co thi jump den k2t
+		bne	 	t4,zero,k2s			# Kiem tra xem tin hieu ngat co phai do k2 gay ra khong, co thi jump den k2t
 		nop							#
 		xori 	t2,t2,0xFF			# Dao gia tri cua den
 		sb  	t2, 0(t0)    		# Hien thi ra den led 
@@ -101,19 +101,38 @@ step2_t:
 		nop
 
 		
-k1t:		
+k1s:	
+		li		t4,0x20						# Vi k1 = 0x001000x0
+		and		t4,a3,t4
+		bne		t4,zero,reset_c_k1			# Kiem tra xem tin hieu ngat co phai do k1 gay ra khong, co thi jump den reset bien dem cua k1
+		nop
+		j not_rs_c_k1
+		nop			
+reset_c_k1:
 		addi t3,zero,0				# Neu dang trong luc lap k1, bam k1 thi tinh lai tu dau
+not_rs_c_k1:
+		
 		addi t5,zero,1				# t5 luu gia tri de xac dinh la loop vi k1
-k1s:
+
 		addi t2,zero,0xF0			# 
 		sb 	 t2, 0(t0)				# Hien thi den nhu yeu cau
 		addi t3,t3,1				# Tang bien dem so chu ki len 1
 		j ends
 		nop							# Ket thuc 1 chu ki
-k2t:		
+
+
+k2s:	
+		li		t4,0x10						# Vi k2 = 0x0001000x
+		and		t4,a3,t4
+		bne		t4,zero,reset_c_k2			# Kiem tra xem tin hieu ngat co phai do k2 gay ra khong, co thi jump den reset bien dem cua k2
+		nop
+		j not_rs_c_k2
+		nop			
+reset_c_k2:	
 		addi t3,zero,0				# Neu dang trong luc lap k2, bam k2 thi tinh lai tu dau
-		addi t6,zero,1				# t6 luu gia tri de xac dinh la loop vi k1
-k2s:
+not_rs_c_k2:		
+		addi t6,zero,1				# t6 luu gia tri de xac dinh la loop vi k2
+	
 		addi t2,zero,0x3C			# 
 		sb 	 t2, 0(t0)				# Hien thi den nhu yeu cau
 		addi t3,t3,1				# Tang bien dem so chu ki len 1
