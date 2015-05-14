@@ -2,35 +2,26 @@
 #include <idtcpu.h>
 #include <excepthdr.h>
 #define PIO_SETUP2 0xffffea2a
-#define SWITCHES 0xbf900000	// Dia chi cua ngan nho, ma ngan nho do tuong ung voi cong tac SWITCH
-#define LEDS     0xbf900000	// Dia chi cua ngan nho, ma ngan nho do tuong ung voi den led, trung dia chi SWITCH.
-#define BUTTONS  0xbfa00000 // Tuong tu nhu SWITCH
-#define LOOP_C		3       // Dem so lan lap cua den
-#define K1_I1		0x60	// Tin hieu ngat cua k1
-#define K1_I1		0x64	// Tin hieu ngat cua k1
-#define K2_I1		0x50	// Tin hieu ngat cua k2
-#define K2_I1		0x54	// Tin hieu ngat cua k2
-
-        .data
-        # Format string for the interrupt routine
-Format: .asciiz "Cause = 0x%x, EPC = 0x%x, Interrupt I/O = 0x%x\n"
-        .text
-        # Interrupt routine. Uses ra, a0, a1, a2, and a3.
-        # It is also necessary to save v0, v1 and t0-t9
-        # since they may be used by the printf routine.
+#define SWITCHES 0xbf900000					# Dia chi cua ngan nho, ma ngan nho do tuong ung voi cong tac SWITCH
+#define LEDS     0xbf900000					# Dia chi cua ngan nho, ma ngan nho do tuong ung voi den led, trung dia chi SWITCH.
+#define BUTTONS  0xbfa00000 				# Tuong tu nhu SWITCH
+.text
+# Interrupt routine. Uses ra, a0, a1, a2, and a3.
+# It is also necessary to save v0, v1 and t0-t9
+# since they may be used by the printf routine.
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # GENERAL INTERRUPT SERVED ROUTINE for all interrupts
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 .globl introutine
 .ent introutine
 .set noreorder		
-.set noat				# Not warning if the AT register is used       
+.set noat									# Not warning if the AT register is used       
 introutine:
 		#--------------------------------------------------------
 		# SAVE the current REG FILE to stack
 		#--------------------------------------------------------
-        subu    sp, sp, 22*4    # Allocate space, 18 regs, 4 args
-        sw      AT, 4*4(sp)     # Save the registers on the stack
+        subu    sp, sp, 22*4    			# Allocate space, 18 regs, 4 args
+        sw      AT, 4*4(sp)    				# Save the registers on the stack
         sw      v0, 5*4(sp)
         sw      v1, 6*4(sp)
         sw      a0, 7*4(sp)
@@ -55,14 +46,14 @@ introutine:
         # Detect the CAUSE of Interrupt, maybe K1, K2, Timer and
         # the instruction address in the main program when it happens (to return later).
         #--------------------------------------------------------
-        mfc0    k0, C0_CAUSE    # Retrieve the cause register 
-        mfc0    k1, C0_EPC      # Retrieve the EPC
+        mfc0    k0, C0_CAUSE    						# Retrieve the cause register 
+        mfc0    k1, C0_EPC      						# Retrieve the EPC
         
 		#--------------------------------------------------------
         # Get the I/O port address
         # Used to detect K1, K2, timer were pressed
         #--------------------------------------------------------
-        lui     s0, 0xbfa0      # Place interrupt I/O port address in s0
+        lui     s0, 0xbfa0      						# Place interrupt I/O port address in s0
         
         #--------------------------------------------------------
         # The main function of GENERAL INTERRUPT SERVED ROUTINE
@@ -81,7 +72,7 @@ check_k1:
 		addi 	t5,zero,0			# Du 3 lan thi reset bien flag t5
 		addi 	t3,zero,0			# Du 3 lan thi reset bien dem
 		addi 	t2,t1,0				# Du 3 lan thi reset trang thai den
-		xori		t2,t2,0xFF			# reset cho lan dau tien
+		xori	t2,t2,0xFF			# reset cho lan dau tien
 check_k2:	
 		addi 	t4,zero,1
 		bne 	t4,t6,step2_t		#Kiem tra xem co trong vong loop cua k1 hay khong. Neu khong thi khong kiem tra dieu kien 3 lan va check xem co phai dang loop cua k2 khong
@@ -95,35 +86,13 @@ check_k2:
 		xori		t2,t2,0xFF			# reset cho lan dau tien
 step2_t:
 		lbu 	a3, 0x0(s0)     	# Read the interrupt I/O port
-		li	 	t4,0x64
-		beq		a3,t4,k1t			# Kiem tra xem tin hieu ngat co phai do k1 gay ra khong
+		li		t4,0x20				# Vi k1 = 0x01000x0
+		and		t4,a3,t4
+		bne		t4,zero,k1t			# Kiem tra xem tin hieu ngat co phai do k1 gay ra khong, co thi jump den k1t
 		nop							#
-		li	 	t4,0x60
-		beq 	a3,t4,k1t			#
-		nop							#
-		li	 	t4,0x20
-		beq 	a3,t4,k1t			#
-		nop							#
-		li	 	t4,0x66
-		beq 	a3,t4,k1t			#
-		nop							#
-		li	 	t4,0x62
-		beq 	a3,t4,k1t			#
-		nop							#
-		li	 	t4,0x54
-		beq	 	a3,t4,k2t			# Kiem tra xem tin hieu ngat co phai do k2 gay ra khong
-		nop							#
-		li 		t4,0x50
-		beq 	a3,t4,k2t			#
-		nop							#
-		li 		t4,0x10
-		beq 	a3,t4,k2t			#
-		nop							#
-		li 		t4,0x51
-		beq 	a3,t4,k2t			#
-		nop							#
-		li 		t4,0x55
-		beq 	a3,t4,k2t			#
+		li		t4,0x10				# Vi k2 = 0x01000x0
+		and		t4,a3,t4
+		bne	 	t4,zero,k2t			# Kiem tra xem tin hieu ngat co phai do k2 gay ra khong, co thi jump den k2t
 		nop							#
 		xori 	t2,t2,0xFF			# Dao gia tri cua den
 		sb  	t2, 0(t0)    		# Hien thi ra den led 
@@ -142,14 +111,14 @@ k1s:
 		j ends
 		nop							# Ket thuc 1 chu ki
 k2t:		
-		addi t3,zero,0				# Neu dang trong luc lap k1, bam k1 thi tinh lai tu dau
+		addi t3,zero,0				# Neu dang trong luc lap k2, bam k2 thi tinh lai tu dau
 		addi t6,zero,1				# t6 luu gia tri de xac dinh la loop vi k1
 k2s:
 		addi t2,zero,0x3C			# 
 		sb 	 t2, 0(t0)				# Hien thi den nhu yeu cau
 		addi t3,t3,1				# Tang bien dem so chu ki len 1
 		j ends
-		nop							# Ket thuc 1 chu ki	
+		nop							# Ket thuc 1 chu ki	xu li ngat
 		
 ends: 	
 		
